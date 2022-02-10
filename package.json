@@ -2,15 +2,18 @@
   "name": "nodejs-circleci-openshift",
   "version": "1.0.0",
   "description": "nodejs-circleci-openshift",
-  "main": "index.js",
+  "main": "app.js",
   "dependencies": {
     "fastify": "^3.27.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "pino-pretty": "^7.5.1",
+    "tap": "^15.1.6"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "fastify start fastify/index.js",
-    "dev": "npx nodemon fastify/index.js"
+    "test": "node app.test.js",
+    "start": "fastify start server.js",
+    "dev": "npx nodemon server.js"
   },
   "author": "",
   "license": "MIT"
