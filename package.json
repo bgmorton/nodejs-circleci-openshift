@@ -1,0 +1,17 @@
+{
+  "name": "nodejs-circleci-openshift",
+  "version": "1.0.0",
+  "description": "nodejs-circleci-openshift",
+  "main": "index.js",
+  "dependencies": {
+    "fastify": "^3.27.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "fastify start fastify/index.js",
+    "dev": "npx nodemon fastify/index.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
