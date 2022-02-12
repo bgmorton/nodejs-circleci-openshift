@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "node app.test.js",
-    "start": "fastify start server.js",
+    "start": "node server.js",
     "dev": "npx nodemon server.js"
   },
   "author": "",
