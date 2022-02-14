@@ -22,7 +22,7 @@ workflows:
           pkg-manager: npm
       
       - docker/publish:
-          registry: docker.io
+          #registry: docker.io
           image: $DOCKER_REPO
           tag: $DOCKER_IMAGE_NAME
           update-description: true
