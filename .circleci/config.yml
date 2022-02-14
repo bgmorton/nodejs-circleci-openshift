@@ -20,10 +20,11 @@ workflows:
           version: '16.10'
           # If you are using yarn, change the line below from "npm" to "yarn"
           pkg-manager: npm
-          
+      
       - docker/publish:
           image: $DOCKER_REPO/$DOCKER_IMAGE_NAME
           update-description: true
+          use-docker-credentials-store: false 
           #use-docker-credentials-store: true # env variables should be called $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
