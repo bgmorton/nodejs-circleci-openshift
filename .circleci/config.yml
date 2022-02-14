@@ -24,9 +24,11 @@ workflows:
       - docker/publish:
           image: $DOCKER_REPO/$DOCKER_IMAGE_NAME
           update-description: true
-          use-docker-credentials-store: true # env variables should be called $DOCKER_LOGIN and $DOCKER_PASSWORD
+          #use-docker-credentials-store: true # env variables should be called $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
           # filters:
           #   branches:
           #     only: main # Only deploy on the main branch
+
+
