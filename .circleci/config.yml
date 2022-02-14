@@ -23,7 +23,7 @@ workflows:
       
       - docker/publish:
           #registry: docker.io
-          image: $DOCKER_LOGIN/$DOCKER_REPO:$DOCKER_IMAGE_NAME
+          image: $DOCKER_LOGIN/$DOCKER_REPO#:$DOCKER_IMAGE_NAME
           update-description: true
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
