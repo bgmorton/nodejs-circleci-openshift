@@ -27,6 +27,6 @@ workflows:
           use-docker-credentials-store: true # env variables should be called $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
-          filters:
-            branches:
-              only: main # Only deploy on the main branch
+          # filters:
+          #   branches:
+          #     only: main # Only deploy on the main branch
