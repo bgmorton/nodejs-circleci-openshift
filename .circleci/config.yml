@@ -24,7 +24,7 @@ workflows:
       - docker/publish:
           #registry: docker.io
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest 
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
