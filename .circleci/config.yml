@@ -19,6 +19,12 @@ jobs:
           openshift-platform-version: 4.x
           token: $OPENSHIFT_TOKEN
           server-address: $OPENSHIFT_SERVER
+          # Would be good to specify project/namespace
+      - run:
+          # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
+          command: >
+            oc delete secret my-docker-registry-secret
+          name: Delete existing secret
       - run:
           # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
           command: >
