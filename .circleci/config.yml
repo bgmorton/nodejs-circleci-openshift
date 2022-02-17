@@ -6,6 +6,47 @@ version: 2.1
 orbs:
   node: circleci/node@4.7
   docker: circleci/docker@2.0.2
+  kubernetes: circleci/kubernetes@0.3.0
+  redhat-openshift: circleci/redhat-openshift@0.2.0
+
+# Define custom jobs for this config
+jobs:
+  deploy-to-cluster:
+    executor: redhat-openshift/default
+    steps:
+      - redhat-openshift/login-and-update-kubeconfig:
+          insecure-skip-tls-verify: true
+          openshift-platform-version: 4.x
+          token: $OPENSHIFT_TOKEN
+          server-address: $OPENSHIFT_SERVER
+      - run:
+          command: |
+            cat \<<- EOF > deployment.yaml
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: nginx-deployment
+            spec:
+              selector:
+                matchLabels:
+                  app: nginx
+              replicas: 2
+              template:
+                metadata:
+                  labels:
+                    app: nginx
+                spec:
+                  containers:
+                  - name: nginx
+                    image: nginx:1.7.9
+                    ports:
+                    - containerPort: 3000
+            EOF
+          name: Create example k8s deployment yaml file
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: deployment.yaml
+          resource-name: deployment/nginx-deployment
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -32,4 +73,4 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
-
+      - deploy-to-cluster
