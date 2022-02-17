@@ -59,11 +59,9 @@ jobs:
                 spec:
                   containers:
                   - name: my-node-js
-                    image: $DOCKER_USERNAME/$DOCKER_REPO:latest 
+                    image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO:latest 
                     ports:
                     - containerPort: 3000
-                imagePullSecrets:
-                  - name: my-docker-registry-secret
             EOF
           name: Create example k8s deployment yaml file
       - kubernetes/create-or-update-resource:
