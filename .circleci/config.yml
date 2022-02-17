@@ -41,22 +41,22 @@ jobs:
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: nginx-deployment
+              name: my-nodejs-deployment
             spec:
               selector:
                 matchLabels:
-                  app: nginx
+                  app: my-node-js
               replicas: 2
               template:
                 metadata:
                   labels:
-                    app: nginx
+                    app: my-node-js
                 spec:
                   containers:
-                  - name: nginx 
-                    image: nginx:1.7.9 # Will need to be changed to test:latest, name/port updated
+                  - name: test 
+                    image: $DOCKER_REPO:latest # Will need to be changed to test:latest, name/port updated
                     ports:
-                    - containerPort: 80
+                    - containerPort: 3000
             EOF
           name: Create example k8s deployment yaml file
       - kubernetes/create-or-update-resource:
