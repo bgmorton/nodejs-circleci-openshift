@@ -59,6 +59,7 @@ jobs:
                 spec:
                   containers:
                   - name: latest
+                    server: $DOCKER_SERVER
                     image: $DOCKER_USERNAME/$DOCKER_REPO # tag? Will need to be changed to test:latest, name/port updated
                     ports:
                     - containerPort: 3000
