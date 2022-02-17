@@ -6,11 +6,73 @@ version: 2.1
 orbs:
   node: circleci/node@4.7
   docker: circleci/docker@2.0.2
+  kubernetes: circleci/kubernetes@0.3.0
+  redhat-openshift: circleci/redhat-openshift@0.2.0
+
+# Define custom jobs for this config
+jobs:
+  deploy-to-cluster:
+    executor: redhat-openshift/default
+    steps:
+      - redhat-openshift/login-and-update-kubeconfig:
+          insecure-skip-tls-verify: true
+          openshift-platform-version: 4.x
+          token: $OPENSHIFT_TOKEN
+          server-address: $OPENSHIFT_SERVER
+          # Would be good to specify project/namespace
+      - run:
+          # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
+          command: >
+            oc delete secret my-docker-registry-secret
+          name: Delete existing secret
+      - run:
+          # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
+          command: >
+            oc create secret docker-registry 
+            --docker-server=$DOCKER_SERVER 
+            --docker-username=$DOCKER_LOGIN 
+            --docker-password=$DOCKER_PASSWORD 
+            --docker-email=unused
+            my-docker-registry-secret
+          name: Create Docker secret
+      - run:
+          # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
+          command: >
+            oc secrets link default my-docker-registry-secret --for=pull
+          name: Add secret to service account
+      - run:
+          command: |
+            cat \<<- EOF > deployment.yaml
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: my-nodejs-deployment
+            spec:
+              selector:
+                matchLabels:
+                  app: my-node-js
+              replicas: 2
+              template:
+                metadata:
+                  labels:
+                    app: my-node-js
+                spec:
+                  containers:
+                  - image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO:latest
+                    name: test
+                    ports:
+                    - containerPort: 3000
+            EOF
+          name: Create example k8s deployment yaml file
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: deployment.yaml
+          resource-name: deployment/my-nodejs-deployment
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+  test-image-deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - node/test:
@@ -22,9 +84,9 @@ workflows:
           pkg-manager: npm
       
       - docker/publish:
-          #registry: docker.io
+          registry: $DOCKER_SERVER
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest 
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest #may only need to tag with $DOCKER_IMAGE_NAME as 'latest' is not required as the defautl now we are manually specifying above
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
@@ -32,4 +94,9 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
+      - deploy-to-cluster
+          #requires:
+          #  - docker/publish # Only deploy once the image has been published
 
+# To view the status of a pod or see deployment errors
+# oc describe pod <pod name> in the OpenShift terminal
