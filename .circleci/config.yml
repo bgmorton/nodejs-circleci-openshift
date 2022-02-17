@@ -58,11 +58,12 @@ jobs:
                     app: my-node-js
                 spec:
                   containers:
-                  - name: latest
-                    server: $DOCKER_SERVER
-                    image: $DOCKER_USERNAME/$DOCKER_REPO # tag? Will need to be changed to test:latest, name/port updated
+                  - name: my-node-js
+                    image: $DOCKER_USERNAME/$DOCKER_REPO:latest 
                     ports:
                     - containerPort: 3000
+                imagePullSecrets:
+                  - name: my-docker-registry-secret
             EOF
           name: Create example k8s deployment yaml file
       - kubernetes/create-or-update-resource:
