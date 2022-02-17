@@ -59,7 +59,7 @@ jobs:
                 spec:
                   containers:
                   - name: test 
-                    image: $DOCKER_USERNAME/$DOCKER_REPO # tag? Will need to be changed to test:latest, name/port updated
+                    image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO:latest # tag? Will need to be changed to test:latest, name/port updated
                     ports:
                     - containerPort: 3000
             EOF
