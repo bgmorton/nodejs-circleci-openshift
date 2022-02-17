@@ -36,6 +36,11 @@ jobs:
             my-docker-registry-secret
           name: Create Docker secret
       - run:
+          # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
+          command: >
+            oc secrets link default my-docker-registry-secret --for=pull
+          name: Add secret to service account
+      - run:
           command: |
             cat \<<- EOF > deployment.yaml
             apiVersion: apps/v1
@@ -54,7 +59,7 @@ jobs:
                 spec:
                   containers:
                   - name: test 
-                    image: $DOCKER_REPO:latest # Will need to be changed to test:latest, name/port updated
+                    image: $DOCKER_USERNAME/$DOCKER_REPO:latest # Will need to be changed to test:latest, name/port updated
                     ports:
                     - containerPort: 3000
             EOF
@@ -81,7 +86,7 @@ workflows:
       - docker/publish:
           registry: $DOCKER_SERVER
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest 
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest #may only need to tag with $DOCKER_IMAGE_NAME as 'latest' is not required as the defautl now we are manually specifying above
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
@@ -92,3 +97,6 @@ workflows:
       - deploy-to-cluster
           #requires:
           #  - docker/publish # Only deploy once the image has been published
+
+# To view the status of a pod or see deployment errors
+# oc describe pod <pod name> in the OpenShift terminal
