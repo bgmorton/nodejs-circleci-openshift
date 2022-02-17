@@ -20,6 +20,15 @@ jobs:
           token: $OPENSHIFT_TOKEN
           server-address: $OPENSHIFT_SERVER
       - run:
+          # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
+          command: >
+            oc create secret docker-registry <pull_secret_name> \
+            --docker-server=$DOCKER_SERVER \
+            --docker-username=$DOCKER_LOGIN \
+            --docker-password=$DOCKER_PASSWORD \
+            --docker-email=unused
+          name: Create Docker secret
+      - run:
           command: |
             cat \<<- EOF > deployment.yaml
             apiVersion: apps/v1
@@ -37,10 +46,10 @@ jobs:
                     app: nginx
                 spec:
                   containers:
-                  - name: nginx
-                    image: nginx:1.7.9
+                  - name: nginx 
+                    image: nginx:1.7.9 # Will need to be changed to test:latest, name/port updated
                     ports:
-                    - containerPort: 3000
+                    - containerPort: 80
             EOF
           name: Create example k8s deployment yaml file
       - kubernetes/create-or-update-resource:
@@ -63,7 +72,7 @@ workflows:
           pkg-manager: npm
       
       - docker/publish:
-          #registry: docker.io
+          registry: $DOCKER_SERVER
           image: $DOCKER_REPO
           tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest 
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
@@ -73,4 +82,6 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
-      - deploy-to-cluster
+      - deploy-to-cluster:
+          #requires:
+          #  - docker/publish # Only deploy once the image has been published
