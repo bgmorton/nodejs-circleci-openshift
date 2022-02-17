@@ -58,7 +58,7 @@ jobs:
                     app: my-node-js
                 spec:
                   containers:
-                  - name: test 
+                  - #name: my-node-js 
                     image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO:latest # tag? Will need to be changed to test:latest, name/port updated
                     ports:
                     - containerPort: 3000
