@@ -58,8 +58,7 @@ jobs:
                     app: my-node-js
                 spec:
                   containers:
-                  - name: latest
-                    image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO 
+                  - image: $DOCKER_SERVER/$DOCKER_USERNAME/$DOCKER_REPO:latest
                     ports:
                     - containerPort: 3000
             EOF
