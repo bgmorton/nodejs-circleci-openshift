@@ -22,7 +22,7 @@ jobs:
       - run:
           # https://docs.openshift.com/container-platform/4.6/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets
           command: >
-            oc create secret docker-registry <pull_secret_name> \
+            oc create secret docker-registry docker-registry \
             --docker-server=$DOCKER_SERVER \
             --docker-username=$DOCKER_LOGIN \
             --docker-password=$DOCKER_PASSWORD \
