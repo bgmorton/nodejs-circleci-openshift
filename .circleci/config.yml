@@ -27,6 +27,7 @@ jobs:
             --docker-username=$DOCKER_LOGIN 
             --docker-password=$DOCKER_PASSWORD 
             --docker-email=unused
+            my-docker-secret # name of secret
           name: Create Docker secret
       - run:
           command: |
