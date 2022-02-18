@@ -19,10 +19,10 @@ jobs:
           openshift-platform-version: 4.x
           token: $OPENSHIFT_TOKEN
           server-address: $OPENSHIFT_SERVER
-      # - run:
-      #     command: >
-      #       oc project $OPENSHIFT_PROJECT
-      #     name: Set active OpenShift project/namespace
+      - run:
+          command: >
+            oc project $OPENSHIFT_PROJECT
+          name: Set active OpenShift project/namespace
       # Otherwise will use default project
       # Above needs fixing - currently: No project specified; default project will be used.
       - run:
