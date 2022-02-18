@@ -20,6 +20,7 @@ jobs:
           token: $OPENSHIFT_TOKEN
           server-address: $OPENSHIFT_SERVER
           # Would be good to specify project/namespace
+          # oc project <YOUR_OS_PROJECT>
       - run:
           # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
           command: >
@@ -64,10 +65,48 @@ jobs:
                     - containerPort: 3000
             EOF
           name: Create example k8s deployment yaml file
+      - run:
+          command: |
+            cat \<<- EOF > route.yaml
+            apiVersion: route.openshift.io/v1
+            kind: Route
+            metadata:
+              name: my-node-js-route
+            spec:
+              to:
+                kind: Service
+                name: my-node-js-service
+              port:
+                targetPort: 3000
+            EOF
+          name: Create example k8s route yaml file
+      - run:
+          command: |
+            cat \<<- EOF > service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: spring-boot-app-service
+            spec:
+              selector:
+                app: spring-boot-app
+              ports:
+                - port: 3000
+                  targetPort: 3000
+            EOF
+          name: Create example k8s service yaml file
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yaml
-          resource-name: deployment/my-nodejs-deployment
+          resource-name: deployment/my-nodejs-resource
+      - run:
+          command: >
+            oc apply -f service.yaml
+          name: Apply service.yaml
+      - run:
+          command: >
+            oc apply -f route.yaml
+          name: Apply route.yaml
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
