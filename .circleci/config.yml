@@ -64,9 +64,14 @@ jobs:
                 spec:
                   containers:
                   - image: $DOCKER_REPO:latest
-                    name: test
+                    name: my-nodejs-app
                     ports:
                     - containerPort: 3000
+                    readinessProbe: 
+                      httpGet: 
+                        scheme: HTTP
+                        path: /
+                        port: 3000 
             EOF
           name: Create example k8s deployment yaml file
       - run:
