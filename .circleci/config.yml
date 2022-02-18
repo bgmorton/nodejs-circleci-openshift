@@ -141,9 +141,9 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
-      - deploy-to-cluster
-          #requires:
-          #  - docker/publish # Only deploy once the image has been published
+      - deploy-to-cluster:
+          requires:
+           - docker/publish # Only deploy once the image has been published
 
 # To view the status of a pod or see deployment errors
 # oc describe pod <pod name> in the OpenShift terminal
