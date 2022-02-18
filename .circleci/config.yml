@@ -95,7 +95,7 @@ jobs:
               selector:
                 app: my-nodejs-app
               ports:
-                - port: 3000
+                - port: 80
                   targetPort: 3000
             EOF
           name: Create example OpenShift service yaml file
