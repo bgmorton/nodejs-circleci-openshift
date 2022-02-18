@@ -51,12 +51,12 @@ jobs:
             spec:
               selector:
                 matchLabels:
-                  app: my-node-js
+                  app: my-nodejs-app
               replicas: 2
               template:
                 metadata:
                   labels:
-                    app: my-node-js
+                    app: my-nodejs-app
                 spec:
                   containers:
                   - image: $DOCKER_REPO:latest
@@ -71,30 +71,30 @@ jobs:
             apiVersion: route.openshift.io/v1
             kind: Route
             metadata:
-              name: my-node-js-route
+              name: my-nodejs-app-route
             spec:
               to:
                 kind: Service
-                name: my-node-js-service
+                name: my-nodejs-app-service
               port:
                 targetPort: 3000
             EOF
-          name: Create example k8s route yaml file
+          name: Create example OpenShift route yaml file
       - run:
           command: |
             cat \<<- EOF > service.yaml
             apiVersion: v1
             kind: Service
             metadata:
-              name: spring-boot-app-service
+              name: my-nodejs-app-service
             spec:
               selector:
-                app: spring-boot-app
+                app: my-nodejs-app
               ports:
                 - port: 3000
                   targetPort: 3000
             EOF
-          name: Create example k8s service yaml file
+          name: Create example OpenShift service yaml file
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yaml
