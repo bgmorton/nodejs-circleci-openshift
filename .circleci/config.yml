@@ -23,7 +23,7 @@ jobs:
           command: >
             oc project $OPENSHIFT_PROJECT
           name: Set active OpenShift project/namespace
-      # Otherwise will use default project
+      # Otherwise will use default project 
       - run:
           # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
           command: >
