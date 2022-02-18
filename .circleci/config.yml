@@ -19,7 +19,12 @@ jobs:
           openshift-platform-version: 4.x
           token: $OPENSHIFT_TOKEN
           server-address: $OPENSHIFT_SERVER
-          # Would be good to specify project/namespace
+      # - run:
+      #     command: >
+      #       oc project $OPENSHIFT_PROJECT
+      #     name: Set active OpenShift project/namespace
+      # Otherwise will use default project
+      # Above needs fixing - currently: No project specified; default project will be used.
       - run:
           # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
           command: >
@@ -50,24 +55,67 @@ jobs:
             spec:
               selector:
                 matchLabels:
-                  app: my-node-js
+                  app: my-nodejs-app
               replicas: 2
               template:
                 metadata:
                   labels:
-                    app: my-node-js
+                    app: my-nodejs-app
                 spec:
                   containers:
                   - image: $DOCKER_REPO:latest
-                    name: test
+                    name: my-nodejs-app
                     ports:
                     - containerPort: 3000
+                    readinessProbe: 
+                      httpGet: 
+                        scheme: HTTP
+                        path: /
+                        port: 3000 
             EOF
           name: Create example k8s deployment yaml file
+      - run:
+          command: |
+            cat \<<- EOF > route.yaml
+            apiVersion: route.openshift.io/v1
+            kind: Route
+            metadata:
+              name: my-nodejs-app-route
+            spec:
+              to:
+                kind: Service
+                name: my-nodejs-app-service
+              port:
+                targetPort: 80
+            EOF
+          name: Create example OpenShift route yaml file
+      - run:
+          command: |
+            cat \<<- EOF > service.yaml
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: my-nodejs-app-service
+            spec:
+              selector:
+                app: my-nodejs-app
+              ports:
+                - port: 80
+                  targetPort: 3000
+            EOF
+          name: Create example OpenShift service yaml file
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yaml
           resource-name: deployment/my-nodejs-deployment
+      - run:
+          command: >
+            oc apply -f service.yaml
+          name: Apply service.yaml
+      - run:
+          command: >
+            oc apply -f route.yaml
+          name: Apply route.yaml
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
