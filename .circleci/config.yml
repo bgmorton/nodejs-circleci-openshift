@@ -23,7 +23,7 @@ jobs:
           command: >
             oc project $OPENSHIFT_PROJECT
           name: Set active OpenShift project/namespace
-      # Otherwise will use default project
+      # Otherwise will use default project 
       - run:
           # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
           command: >
@@ -85,7 +85,7 @@ jobs:
                 kind: Service
                 name: my-nodejs-app-service
               port:
-                targetPort: 80
+                targetPort: 3000
             EOF
           name: Create example OpenShift route yaml file
       - run:
@@ -99,7 +99,7 @@ jobs:
               selector:
                 app: my-nodejs-app
               ports:
-                - port: 80
+                - port: 3000
                   targetPort: 3000
             EOF
           name: Create example OpenShift service yaml file
@@ -141,9 +141,9 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
-      - deploy-to-cluster
-          #requires:
-          #  - docker/publish # Only deploy once the image has been published
+      - deploy-to-cluster:
+          requires:
+           - docker/publish # Only deploy once the image has been published
 
 # To view the status of a pod or see deployment errors
 # oc describe pod <pod name> in the OpenShift terminal
