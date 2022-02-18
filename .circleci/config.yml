@@ -98,7 +98,7 @@ jobs:
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yaml
-          resource-name: deployment/my-nodejs-resource
+          resource-name: deployment/my-nodejs-deployment
       - run:
           command: >
             oc apply -f service.yaml
