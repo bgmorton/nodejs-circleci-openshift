@@ -93,7 +93,7 @@ jobs:
       # If it's less than 1, an exit code of 1 is returned which will tell CCI to abort the workflow
       - run:
           command: >
-            oc get deployment my-nodejs-deployment-$CIRCLE_SHA1 | awk 'FNR == 2 {print $4}' | if [ $(</dev/stdin) -lt 1 ]; then exit 1; fi
+            oc get deployment my-nodejs-deployment-$CIRCLE_SHA1 | awk 'FNR == 2 {print $4}' | if [ $(</dev/stdin) -lt 4 ]; then exit 1; fi
           name: Check health of new deployment
       #If this has succeeded, the service and route can be updated, if not, CCI will have stopped so that you can investigate
       - run:
