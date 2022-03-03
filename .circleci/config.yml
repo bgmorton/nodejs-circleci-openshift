@@ -56,13 +56,17 @@ jobs:
                 matchLabels:
                   app: my-nodejs-app
               replicas: 2
-            #  strategy:
-            #    type: Recreate
+              # Uncomment to change update strategy
+              # strategy:
+              #   type: Recreate
               template:
                 metadata:
                   labels:
                     app: my-nodejs-app
                 spec:
+                  # Uncomment this to specify which nodes to deploy to
+                  # nodeSelector:
+                  #   region: west
                   containers:
                   - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
                     name: my-nodejs-app
