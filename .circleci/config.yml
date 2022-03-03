@@ -77,21 +77,6 @@ jobs:
           name: Create example k8s deployment yml file
       - run:
           command: |
-            cat \<<- EOF > route.yml
-            apiVersion: route.openshift.io/v1
-            kind: Route
-            metadata:
-              name: my-nodejs-app-route
-            spec:
-              to:
-                kind: Service
-                name: my-nodejs-app-service
-              port:
-                targetPort: 3000
-            EOF
-          name: Create example OpenShift route yml file
-      - run:
-          command: |
             cat \<<- EOF > service.yml
             apiVersion: v1
             kind: Service
@@ -105,6 +90,21 @@ jobs:
                   targetPort: 3000
             EOF
           name: Create example OpenShift service yml file
+      - run:
+          command: |
+            cat \<<- EOF > route.yml
+            apiVersion: route.openshift.io/v1
+            kind: Route
+            metadata:
+              name: my-nodejs-app-route
+            spec:
+              to:
+                kind: Service
+                name: my-nodejs-app-service
+              port:
+                targetPort: 3000
+            EOF
+          name: Create example OpenShift route yml file
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yml
