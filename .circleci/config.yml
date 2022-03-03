@@ -65,8 +65,8 @@ jobs:
                     app: my-nodejs-app
                 spec:
                   # Uncomment this to specify which nodes to deploy to
-                  # nodeSelector:
-                    # region: east
+                  nodeSelector:
+                    region: west
                     # disktype: ssd
                   containers:
                   - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
@@ -148,9 +148,10 @@ workflows:
             branches:
               only: main # Only deploy on the main branch
 
-      - deploy-to-cluster:
-          requires:
-           - docker/publish # Only deploy once the image has been published
+      - deploy-to-cluster
+      # :
+      #     requires:
+      #      - docker/publish # Only deploy once the image has been published
 
 # To view the status of a pod or see deployment errors
 # oc describe pod <pod name> in the OpenShift terminal
