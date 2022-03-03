@@ -139,7 +139,7 @@ workflows:
       - docker/publish:
           registry: $DOCKER_SERVER
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 # tag with $DOCKER_IMAGE_NAME and the circle CI unique SHA1
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 # tag with $DOCKER_IMAGE_NAME and the circle CI unique SHA1 for this commit
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
