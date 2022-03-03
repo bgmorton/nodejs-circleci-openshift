@@ -46,7 +46,7 @@ jobs:
           name: Add secret to service account
       - run:
           command: |
-            cat \<<- EOF > deployment.yaml
+            cat \<<- EOF > deployment.yml
             apiVersion: apps/v1
             kind: Deployment
             metadata:
@@ -56,13 +56,15 @@ jobs:
                 matchLabels:
                   app: my-nodejs-app
               replicas: 2
+            #  strategy:
+            #    type: Recreate
               template:
                 metadata:
                   labels:
                     app: my-nodejs-app
                 spec:
                   containers:
-                  - image: $DOCKER_REPO:latest
+                  - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
                     name: my-nodejs-app
                     ports:
                     - containerPort: 3000
@@ -72,10 +74,10 @@ jobs:
                         path: /
                         port: 3000 
             EOF
-          name: Create example k8s deployment yaml file
+          name: Create example k8s deployment yml file
       - run:
           command: |
-            cat \<<- EOF > route.yaml
+            cat \<<- EOF > route.yml
             apiVersion: route.openshift.io/v1
             kind: Route
             metadata:
@@ -87,10 +89,10 @@ jobs:
               port:
                 targetPort: 3000
             EOF
-          name: Create example OpenShift route yaml file
+          name: Create example OpenShift route yml file
       - run:
           command: |
-            cat \<<- EOF > service.yaml
+            cat \<<- EOF > service.yml
             apiVersion: v1
             kind: Service
             metadata:
@@ -102,19 +104,19 @@ jobs:
                 - port: 3000
                   targetPort: 3000
             EOF
-          name: Create example OpenShift service yaml file
+          name: Create example OpenShift service yml file
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
-          resource-file-path: deployment.yaml
+          resource-file-path: deployment.yml
           resource-name: deployment/my-nodejs-deployment
       - run:
           command: >
-            oc apply -f service.yaml
-          name: Apply service.yaml
+            oc apply -f service.yml
+          name: Apply service.yml
       - run:
           command: >
-            oc apply -f route.yaml
-          name: Apply route.yaml
+            oc apply -f route.yml
+          name: Apply route.yml
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -133,7 +135,7 @@ workflows:
       - docker/publish:
           registry: $DOCKER_SERVER
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1,latest #may only need to tag with $DOCKER_IMAGE_NAME as 'latest' is not required as the defautl now we are manually specifying above
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 # tag with $DOCKER_IMAGE_NAME and the circle CI unique SHA1
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
