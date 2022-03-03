@@ -13,6 +13,6 @@ server.listen(3000, '0.0.0.0', (err, address) => {
     server.log.error(err)
     process.exit(1)
   }
-  console.log(`🚀 Server ready`);
-    console.log(`Running on ${address}`);
+  console.log(`🚀 Server ready`)
+    console.log(`Running on ${address}`)
 })

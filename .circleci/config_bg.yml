@@ -1,4 +1,6 @@
-# This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
+# This CircleCI configuration creates a basic blue/green deployment.
+# A deployment (green) is created and checked, and if the check is passed public routes and services are switched from the previous deployment (blue)
+
 version: 2.1
 
 # Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
@@ -10,6 +12,7 @@ orbs:
   redhat-openshift: circleci/redhat-openshift@0.2.0
 
 # Define custom jobs for this config
+# See: https://circleci.com/docs/2.0/jobs-steps/
 jobs:
   deploy-to-cluster:
     executor: redhat-openshift/default
@@ -25,7 +28,7 @@ jobs:
           name: Set active OpenShift project/namespace
       # Otherwise will use default project 
       - run:
-          # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
+          # Delete existing docker secret if it exists (We don't mind recreating it as the details may have changed)
           command: >
             oc delete secret my-docker-registry-secret
           name: Delete existing secret
@@ -44,8 +47,8 @@ jobs:
           command: >
             oc secrets link default my-docker-registry-secret --for=pull
           name: Add secret to service account
-      # Create new deployment (Green)
-      # $CIRCLE_SHA1 - The SHA1 hash of the last commit of the current build.
+      # Create new deployment configuration for the green deployment
+      # $CIRCLE_SHA1 is the SHA1 hash of the last commit of the current build
       - run:
           command: |
             cat \<<- EOF > deployment.yml
@@ -81,21 +84,22 @@ jobs:
                         port: 3000 
             EOF
           name: Create example k8s deployment yml file
+      # Create and deploy the resources defined for the green deployment
+      # Due to the use of $CIRCLE_SHA1, each deployment will have a unique name which we can use to update the services/routes if deployment succeeds
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: deployment.yml
           resource-name: deployment/my-nodejs-deployment-$CIRCLE_SHA1
-      
-      # may need to sleep here
-
-      # Run readiness check on green
-      # This is a Bash one-liner which feeds the output of 'oc get deployment' to awk - which extracts the number of available pods
-      # If it's less than 1, an exit code of 1 is returned which will tell CCI to abort the workflow
+      # Before updating the routes/services to point to the new deployment, ensure it has available pods
+      # This is done using a Bash one-liner which feeds the output of 'oc get deployment' to awk - which extracts the number of available pods
+      # This information appears in the 4th column on the second row of the oc command output
+      # If the number of available pods is less than 1, an exit code of 1 is returned which will tell CCI to abort the workflow
       - run:
           command: >
             oc get deployment my-nodejs-deployment-$CIRCLE_SHA1 | awk 'FNR == 2 {print $4}' | if [ $(</dev/stdin) -lt 1 ]; then exit 1; fi
           name: Check health of new deployment
-      #If this has succeeded, the service and route can be updated, if not, CCI will have stopped so that you can investigate
+      # If the above command has completed successfully, pods are available in the green deployment
+      # Services and routes can now be safely updated to point to the new deployment instead of the previous (blue) deployment
       - run:
           command: |
             cat \<<- EOF > service.yml
@@ -135,7 +139,7 @@ jobs:
             oc apply -f route.yml
           name: Apply route.yml
 
-        # old deployments can be manually deprovisions
+      # Old and failed deployments are not automatically deprovisions so that a post-mortem can be performed if any errors have occured
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -165,6 +169,3 @@ workflows:
       - deploy-to-cluster:
           requires:
            - docker/publish # Only deploy once the image has been published
-
-# To view the status of a pod or see deployment errors
-# oc describe pod <pod name> in the OpenShift terminal

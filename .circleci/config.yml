@@ -1,4 +1,3 @@
-# This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
 version: 2.1
 
 # Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
@@ -10,6 +9,7 @@ orbs:
   redhat-openshift: circleci/redhat-openshift@0.2.0
 
 # Define custom jobs for this config
+# See: https://circleci.com/docs/2.0/jobs-steps/
 jobs:
   deploy-to-cluster:
     executor: redhat-openshift/default
@@ -23,9 +23,9 @@ jobs:
           command: >
             oc project $OPENSHIFT_PROJECT
           name: Set active OpenShift project/namespace
-      # Otherwise will use default project 
+      # Otherwise the default project will be used
       - run:
-          # Delete existing docker secret if it exists (We dont mind recreating it as the details may have changed)
+          # Delete existing docker secret if it exists (We don't mind recreating it as the details may have changed)
           command: >
             oc delete secret my-docker-registry-secret
           name: Delete existing secret
@@ -139,7 +139,7 @@ workflows:
       - docker/publish:
           registry: $DOCKER_SERVER
           image: $DOCKER_REPO
-          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 # tag with $DOCKER_IMAGE_NAME and the circle CI unique SHA1 for this commit
+          tag: $DOCKER_IMAGE_NAME,$CIRCLE_SHA1 # tag with $DOCKER_IMAGE_NAME and the CircleCI unique SHA1 hash for this commit
           use-docker-credentials-store: false  # env variables should be used instead, named $DOCKER_LOGIN and $DOCKER_PASSWORD
           requires:
             - node/test # Only deploy once the build job has completed
@@ -150,6 +150,3 @@ workflows:
       - deploy-to-cluster:
           requires:
            - docker/publish # Only deploy once the image has been published
-
-# To view the status of a pod or see deployment errors
-# oc describe pod <pod name> in the OpenShift terminal
