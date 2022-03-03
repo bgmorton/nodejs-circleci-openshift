@@ -66,8 +66,8 @@ jobs:
                 spec:
                   # Uncomment this to specify which nodes to deploy to
                   nodeSelector:
-                    region: west
-                    # disktype: ssd
+                    # region: west
+                    disktype: ssd
                   containers:
                   - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
                     name: my-nodejs-app
