@@ -64,14 +64,14 @@ jobs:
               template:
                 metadata:
                   labels:
-                    app: my-nodejs-app
+                    app: my-nodejs-app-$CIRCLE_SHA1
                 spec:
                   # Uncomment this to specify which nodes to deploy to
                   # nodeSelector:
                   #   region: west
                   containers:
                   - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
-                    name: my-nodejs-app
+                    name: my-nodejs-app-$CIRCLE_SHA1
                     ports:
                     - containerPort: 3000
                     readinessProbe: 
@@ -135,7 +135,7 @@ jobs:
             oc apply -f route.yml
           name: Apply route.yml
 
-        # delete old deployment here?
+        # old deployments can be manually deprovisions
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
