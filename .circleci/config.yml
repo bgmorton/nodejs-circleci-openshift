@@ -64,6 +64,9 @@ jobs:
                   labels:
                     app: my-nodejs-app
                 spec:
+                  # Uncomment this to specify which nodes to deploy to
+                  nodeSelector:
+                    region: west
                   containers:
                   - image: $DOCKER_REPO:$DOCKER_IMAGE_NAME
                     name: my-nodejs-app
